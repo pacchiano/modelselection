@@ -31,11 +31,11 @@ bash commit.sh;
 
 for experiment in "${experiments20000[@]}"; 
 do
-	python experiments_synthetic.py 1000 $experiment $num_experiments $allmodselalgos True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $corralvariants True;	
-	python experiments_synthetic.py 1000 $experiment $num_experiments $exp3variants True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $doublingvariants True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $estimatedvariants True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $allmodselalgos True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $corralvariants True;	
+	python experiments_synthetic.py 20000 $experiment $num_experiments $exp3variants True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $doublingvariants True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $estimatedvariants True;
 done
 
 bash commit.sh;
@@ -43,11 +43,11 @@ bash commit.sh;
 
 for experiment in "${experiments100000[@]}"; 
 do
-	python experiments_synthetic.py 1000 $experiment $num_experiments $allmodselalgos True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $corralvariants True;	
-	python experiments_synthetic.py 1000 $experiment $num_experiments $exp3variants True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $doublingvariants True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $estimatedvariants True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $allmodselalgos True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $corralvariants True;	
+	python experiments_synthetic.py 100000 $experiment $num_experiments $exp3variants True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $doublingvariants True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $estimatedvariants True;
 done
 
 bash commit.sh;
