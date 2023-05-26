@@ -1,3 +1,0 @@
-CorralLow (382, 9)
-Corral (376, 7)
-CorralMedium (374, 12)
