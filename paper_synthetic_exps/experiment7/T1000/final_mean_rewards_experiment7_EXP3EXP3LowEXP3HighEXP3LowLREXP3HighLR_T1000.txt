@@ -1,0 +1,5 @@
+EXP3 (125, 5)
+EXP3Low (126, 7)
+EXP3High (110, 5)
+EXP3LowLR (200, 6)
+EXP3HighLR (171, 22)
