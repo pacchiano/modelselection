@@ -19,7 +19,7 @@ random.seed(1000)
 
 
 def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, parameters,  
-	modselalgo = "Corral"):
+	modselalgo = "Corral", name = ""):
 	
 
 	if modselalgo in ["BalancingClassic", "DoublingDataDrivenBig", "EstimatingDataDrivenBig"]:
@@ -59,9 +59,11 @@ def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, pa
 		probabilities.append(modsel_manager.get_distribution())
 		parameter_pulls[modsel_sample_idx] += 1
 		parameter = processed_parameters[modsel_sample_idx]
+
 		print("Selected parameter {}".format(parameter))
 		print("Modselalgo {}".format(modselalgo))
-
+		print(name)
+		
 		base_algorithm = base_algorithms[modsel_sample_idx]
 
 		context = bandit.get_context()
@@ -113,9 +115,9 @@ def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, pa
 
 @ray.remote
 def run_experiments_remote(bandit, arm_set_type, get_base_algorithms, num_timesteps, parameters,  
-	modselalgo = "Corral"):
+	modselalgo = "Corral", name = ""):
 	return run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, parameters,  
-	modselalgo = modselalgo)
+	modselalgo = modselalgo, name = name)
 
 
 
@@ -220,14 +222,14 @@ if __name__ == "__main__":
 					parallelism_schedule = produce_parallelism_schedule(num_experiments, MAX_PARALLELISM)
 					for batch in parallelism_schedule:
 						partial_results = [run_experiments_remote.remote(bandit, arm_set_type, get_base_algorithms, num_timesteps, 
-									[parameter],  modselalgo = "Corral") for _ in range(batch) ]
+									[parameter],  modselalgo = "Corral", name = "{} base".format(experiment_name)) for _ in range(batch) ]
 						partial_results = ray.get(partial_results)
 						results += partial_results
 
 				else:
 					for _ in range(num_experiments):
 						result = run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, 
-							[parameter],  modselalgo = "Corral") ### Here we can use any modselalgo, it is dummy in this case.
+							[parameter],  modselalgo = "Corral", name = "{} base".format(experiment_name)) ### Here we can use any modselalgo, it is dummy in this case.
 						results.append(result)
 
 
@@ -293,6 +295,7 @@ if __name__ == "__main__":
 								num_timesteps, 
 								parameters,  
 								modselalgo = modselalgo, 
+								name = "{} modsel".format(experiment_name),
 								) for _ in range(batch)]
 					partial_results = ray.get(partial_results)
 					results += partial_results
@@ -306,6 +309,7 @@ if __name__ == "__main__":
 							num_timesteps, 
 							parameters,  
 							modselalgo = modselalgo, 
+							name = "{} modsel".format(experiment_name),
 							)
 					results.append(result)
 
