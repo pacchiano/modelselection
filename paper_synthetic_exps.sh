@@ -15,17 +15,17 @@ estimatedvariants=EstimatingDataDriven,EstimatingDataDrivenMedium,EstimatingData
 #bash commit.sh;
 
 
-for experiment in "${experiments1000[@]}"; 
-do
-	python experiments_synthetic.py 1000 $experiment $num_experiments $allmodselalgos True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $corralvariants True;	
-	python experiments_synthetic.py 1000 $experiment $num_experiments $exp3variants True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $doublingvariants True;
-	python experiments_synthetic.py 1000 $experiment $num_experiments $estimatedvariants True;
+# for experiment in "${experiments1000[@]}"; 
+# do
+# 	python experiments_synthetic.py 1000 $experiment $num_experiments $allmodselalgos True;
+# 	python experiments_synthetic.py 1000 $experiment $num_experiments $corralvariants True;	
+# 	python experiments_synthetic.py 1000 $experiment $num_experiments $exp3variants True;
+# 	python experiments_synthetic.py 1000 $experiment $num_experiments $doublingvariants True;
+# 	python experiments_synthetic.py 1000 $experiment $num_experiments $estimatedvariants True;
 
-done
+# done
 
-bash commit.sh;
+# bash commit.sh;
 
 
 
