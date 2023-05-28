@@ -482,6 +482,9 @@ def get_modsel_manager(modselalgo,num_parameters, num_timesteps , parameters = [
         modsel_manager = CorralHyperparam(num_parameters, eta = 1/np.sqrt(num_timesteps), T = num_timesteps) ### hack
     elif modselalgo == "CorralHigh":
         modsel_manager = CorralHyperparam(num_parameters,  eta = 10/np.sqrt(num_timesteps), T = num_timesteps) ### hack    
+
+    elif modselalgo == "CorralSuperHigh":
+        modsel_manager = CorralHyperparam(num_parameters,  eta = 50/np.sqrt(num_timesteps), T = num_timesteps) ### hack    
     
     elif modselalgo == "EXP3Low":
             modsel_manager = EXP3Hyperparam(num_parameters, T = num_timesteps, eta_multiplier = 1, discount_factor = 1, 
@@ -534,6 +537,11 @@ def get_modsel_manager(modselalgo,num_parameters, num_timesteps , parameters = [
     elif modselalgo in "EstimatingDataDrivenHigh":
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 10, classic = True, empirical = True)
 
+    elif modselalgo in "DoublingDataDrivenSuperHigh":
+        modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 50, classic = True)
+
+    elif modselalgo in "EstimatingDataDrivenSuperHigh":
+        modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 50, classic = True, empirical = True)
 
 
     else:

@@ -3,13 +3,9 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import os
-
 import ray
-
 import IPython
 from algorithmsmodsel import get_modsel_manager
-#from bandit_algs import UCBalgorithm, LUCBalgorithm, EXP3
-#from bandit_envs import BernoulliBandit, GaussianBandit, LinearBandit, LinearContextualBandit, SphereContextDistribution
 from utilities import pickle_and_zip, unzip_and_load_pickle, produce_parallelism_schedule, write_dictionary_file, get_conditional_filename_hashing
 from experiment_parameters import get_experiment_info
 
@@ -120,8 +116,6 @@ def run_experiments_remote(bandit, arm_set_type, get_base_algorithms, num_timest
 
 
 
-
-
 if __name__ == "__main__":
 
 	np.random.seed(1000)
@@ -136,17 +130,22 @@ if __name__ == "__main__":
 	num_timesteps = int(sys.argv[1])
 	exp_type = str(sys.argv[2])
 	num_experiments = int(sys.argv[3])
-	modselalgos = str(sys.argv[4])
-	modselalgos = modselalgos.split(",")
+	modselalgos_raw = str(sys.argv[4])
+	modselalgos = modselalgos_raw.split(",")
 	normalize = str(sys.argv[5]) == "True"
 	# IPython.embed()
 	# raise ValueError("asdflkm")
 
 
+	print("Starting experiment {}".format(exp_type))
+	print("Num timesteps {}".format(num_timesteps))
+	print("Moselalgos {}".format(modselalgos_raw))
+
+
 	### PLOT PARAMETERS
 	plot_bbox = True
 	USE_RAY = True
-	FROM_FILE = False ### If this flag is true then it will try to load from file when possible. If False it will overwrite 
+	FROM_FILE = False ### FIX THIS. If this flag is true then it will try to load from file when possible. If False it will overwrite 
 	SAVE_ALL_RUN_DATA = False
 
 
@@ -251,9 +250,7 @@ if __name__ == "__main__":
 				std_cum_regrets = np.std(cum_regrets_all,0)
 
 
-				### BASELINES RESULTS is not used
 				baselines_results.append((mean_cum_regrets, std_cum_regrets))
-
 				baselines_all_data.append((parameter, cum_regrets_all))
 
 
@@ -392,10 +389,7 @@ if __name__ == "__main__":
 					mean_cum_regrets *= normalization_visualization	
 					std_cum_regrets *= normalization_visualization
 
-		
-		#plt.plot(np.arange(num_timesteps) + 1, mean_cum_regrets, label = "{}{}".format(plot_parameter_name, parameter), color = color )
-		#plt.fill_between(np.arange(num_timesteps) + 1,mean_cum_regrets - std_plot_multiplier*std_cum_regrets,mean_cum_regrets + std_plot_multiplier*std_cum_regrets, alpha = .05 , color = color )
-		
+				
 		mean_at_zero = mean_cum_regrets[0] 
 		std_at_zero = std_cum_regrets[0]
 

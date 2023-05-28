@@ -22,16 +22,37 @@ if __name__ == "__main__":
 	exp_types_original = str(sys.argv[2])
 	exp_types = exp_types_original.split(",")
 	num_experiments = int(sys.argv[3])
-	modselalgos = str(sys.argv[4])
-	modselalgos = modselalgos.split(",")
-	# IPython.embed()
-	# raise ValueError("asdflkm")
+	all_modselalgos = str(sys.argv[4])
+	all_modselalgos = all_modselalgos.split(",")
 
-	table_code = "\\begin{tabular}{|l |"
+	modselalgos = str(sys.argv[5])
+	modselalgos = modselalgos.split(",")
+
+
+	all_modsel_names = ""
+	for modselalgo in all_modselalgos:
+		all_modsel_names += modselalgo
+
+
+	table_code = """
+		\\begin{landscape}
+		\\begin{table}[t]
+		\\caption{
+		}
+		\\hspace{-.5cm}
+		\\scalebox{0.5}{
+		\\bgroup
+		\\def\\arraystretch{1.1}
+
+		"""
+
+
+	table_code += "\\begin{tabular}{|l |"
 
 	table_code += "c|"*len(modselalgos) + "}\n" 
 	table_code += "\\hline \n"
 	table_code +=  "Name "
+
 
 
 	modsel_names = ""
@@ -74,7 +95,7 @@ if __name__ == "__main__":
 
 
 		mean_rewards_log_filename_stub = get_conditional_filename_hashing("final_mean_rewards_{}_{}_T{}".format(experiment_name, 
-			modsel_names, num_timesteps))
+			all_modsel_names, num_timesteps))
 
 		final_mean_rewards_log_filename = "{}/{}.txt".format(exp_data_dir_T, mean_rewards_log_filename_stub)
 		
@@ -108,9 +129,21 @@ if __name__ == "__main__":
 	table_code += "\\hline \n \\end{tabular}"
 
 
+
+	table_code += """
+		\\egroup
+		}
+		\\vspace{1mm}
+		\\end{table}
+		\\end{landscape}
+		"""
+
 	resulting_filename_stub = get_conditional_filename_hashing("table_{}_{}".format(exp_types_original,modsel_names), tolerance = 40)
 	#IPython.embed()
 	resulting_filename = "{}/{}.tex".format(table_data_dir, resulting_filename_stub)
+
+
+
 
 
 	with open(resulting_filename, "w") as f:
