@@ -13,9 +13,6 @@ from algorithmsmodsel import get_modsel_manager
 from utilities import pickle_and_zip, unzip_and_load_pickle, produce_parallelism_schedule, write_dictionary_file, get_conditional_filename_hashing
 from experiment_parameters import get_experiment_info
 
-np.random.seed(1000)
-random.seed(1000)
-
 
 
 def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, parameters,  
@@ -63,7 +60,7 @@ def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, pa
 		print("Selected parameter {}".format(parameter))
 		print("Modselalgo {}".format(modselalgo))
 		print(name)
-		
+
 		base_algorithm = base_algorithms[modsel_sample_idx]
 
 		context = bandit.get_context()
@@ -126,6 +123,10 @@ def run_experiments_remote(bandit, arm_set_type, get_base_algorithms, num_timest
 
 
 if __name__ == "__main__":
+
+	np.random.seed(1000)
+	random.seed(1000)
+
 
 	### RUN PARAMETERS
 	MAX_PARALLELISM = 2000

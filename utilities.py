@@ -5,10 +5,10 @@ import hashlib
 import IPython
 
 
-def get_conditional_filename_hashing(filename):
+def get_conditional_filename_hashing(filename, tolerance = 0):
     max_filename_length = os.pathconf('/', 'PC_NAME_MAX')
     #max_path_length = os.pathconf('/', 'PC_PATH_MAX')
-    if len(filename) > max_filename_length:# or len(os.path.abspath(filename)) > max_path_length:
+    if len(filename) > max_filename_length - tolerance:# or len(os.path.abspath(filename)) > max_path_length:
         hashed_filename = hashlib.sha256(filename.encode()).hexdigest()
         return hashed_filename
     return filename
@@ -53,7 +53,7 @@ def pickle_and_zip(obj, results_filename_stub, base_data_dir, is_zip_file = Fals
   if hash_filename:
     processed_results_filename_stub = get_conditional_filename_hashing(results_filename_stub)
   processed_results_filename_stub = results_filename_stub
-  
+
   pickle_results_filename = "{}.p".format(processed_results_filename_stub)
   ### start by saving the file using pickle
 
@@ -105,3 +105,21 @@ def write_dictionary_file(dictionary, filename):
       f.write("{} {}".format(a,b))
       f.write('\n')
     f.close()
+
+
+
+
+def read_dictionary_file(filename):
+  dictionary = dict([])
+  with open(filename, "r") as f:
+    for line in f.readlines():
+
+      algo_name = line.split(" ")[0]
+      
+      mean_val = int(line.split(" ")[1][1:-1])
+      std_val = int(line.split(" ")[2][:-2])
+      dictionary[algo_name] = (mean_val, std_val)
+    f.close()
+  return dictionary
+
+
