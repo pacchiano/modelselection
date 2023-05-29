@@ -390,8 +390,9 @@ class BalancingHyperparamDoublingDataDriven:
             return np.argmin(self.balancing_potentials)
         else:
             if sum([np.isnan(x) for x in self.base_probas]) > 0:
-                print("Found Nan Values in the sampling procedure for base index")
-                IPython.embed()
+                raise ValueError("Found Nan Values in the sampling procedure for base index")
+                
+                #IPython.embed()
             sample_array = np.random.choice(range(self.m), 1, p=self.base_probas)
             return sample_array[0]
 
@@ -402,11 +403,11 @@ class BalancingHyperparamDoublingDataDriven:
             self.base_probas[self.sample_base_index()] = 1 
 
         else:
-            raise ValueError("Not implemented randomized selection rule for the algorithm index. Implement.")
-            self.distribution_base_parameters = [1.0/(x**2) for x in self.putative_bounds_multipliers]
+            #raise ValueError("Not implemented randomized selection rule for the algorithm index. Implement.")
+            distribution_base_parameters = [1.0/(x**2) for x in self.putative_bounds_multipliers]
 
-            normalization_factor = np.sum(self.distribution_base_parameters)
-            self.base_probas = [x/normalization_factor for x in self.distribution_base_parameters]
+            normalization_factor = np.sum(distribution_base_parameters)
+            self.base_probas = [x/normalization_factor for x in distribution_base_parameters]
     
 
 
@@ -445,6 +446,11 @@ class BalancingHyperparamDoublingDataDriven:
         if self.empirical:
             clipped_regret = min( empirical_regret_estimator,  2*self.balancing_potentials[algo_idx])
             self.balancing_potentials[algo_idx] = max(clipped_regret, self.balancing_potentials[algo_idx], self.dmin*np.sqrt(self.num_plays[algo_idx]) )
+            ### Compute implied putative bound multipliers.
+            self.putative_bounds_multipliers[algo_idx] = max(self.balancing_potentials[algo_idx]/np.sqrt(self.num_plays[algo_idx]), self.dmin)
+
+
+
         else:
             ### test for misspecification
             if empirical_regret_estimator > self.putative_bounds_multipliers[algo_idx]*np.sqrt(self.num_plays[algo_idx]):
@@ -525,22 +531,29 @@ def get_modsel_manager(modselalgo,num_parameters, num_timesteps , parameters = [
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 1, classic = True, empirical = True)
 
 
-    elif modselalgo in "DoublingDataDrivenMedium":
+    elif modselalgo == "DoublingDataDrivenStoch":
+        modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 1, classic = False)
+
+    elif modselalgo == "EstimatingDataDrivenStoch":
+        modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 1, classic = False, empirical = True)
+
+
+    elif modselalgo == "DoublingDataDrivenMedium":
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 3, classic = True)
 
-    elif modselalgo in "EstimatingDataDrivenMedium":
+    elif modselalgo == "EstimatingDataDrivenMedium":
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 3, classic = True, empirical = True)
 
-    elif modselalgo in "DoublingDataDrivenHigh":
+    elif modselalgo == "DoublingDataDrivenHigh":
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 10, classic = True)
 
-    elif modselalgo in "EstimatingDataDrivenHigh":
+    elif modselalgo == "EstimatingDataDrivenHigh":
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 10, classic = True, empirical = True)
 
-    elif modselalgo in "DoublingDataDrivenSuperHigh":
+    elif modselalgo == "DoublingDataDrivenSuperHigh":
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 50, classic = True)
 
-    elif modselalgo in "EstimatingDataDrivenSuperHigh":
+    elif modselalgo == "EstimatingDataDrivenSuperHigh":
         modsel_manager = BalancingHyperparamDoublingDataDriven(num_parameters, c = 1, dmin = 50, classic = True, empirical = True)
 
 

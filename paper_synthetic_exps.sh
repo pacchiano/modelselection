@@ -14,7 +14,7 @@ estimatedvariants=EstimatingDataDriven,EstimatingDataDrivenMedium,EstimatingData
 papervariants=DoublingDataDriven,EstimatingDataDriven,Corral,BalancingClassic,UCB,Greedy,EXP3
 superhigh=CorralSuperHigh,DoublingDataDrivenSuperHigh,EstimatingDataDrivenSuperHigh
 #bash commit.sh;
-
+stochsamplingvariants=DoublingDataDrivenStoch,EstimatingDataDrivenStoch
 
 for experiment in "${experiments1000[@]}"; 
 do
@@ -24,7 +24,7 @@ do
 	python experiments_synthetic.py 1000 $experiment $num_experiments $doublingvariants True;
 	python experiments_synthetic.py 1000 $experiment $num_experiments $estimatedvariants True;
 	python experiments_synthetic.py 1000 $experiment $num_experiments $papervariants True;
-
+	python experiments_synthetic.py 1000 $experiment $num_experiments $stochsamplingvariants True;
 done
 
 bash commit.sh;
@@ -39,6 +39,7 @@ do
 	python experiments_synthetic.py 20000 $experiment $num_experiments $doublingvariants True;
 	python experiments_synthetic.py 20000 $experiment $num_experiments $estimatedvariants True;
 	python experiments_synthetic.py 20000 $experiment $num_experiments $papervariants True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $stochsamplingvariants True;
 
 done
 
@@ -53,6 +54,7 @@ do
 	python experiments_synthetic.py 100000 $experiment $num_experiments $doublingvariants True;
 	python experiments_synthetic.py 100000 $experiment $num_experiments $estimatedvariants True;
 	python experiments_synthetic.py 100000 $experiment $num_experiments $papervariants True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $stochsamplingvariants True;
 
 done
 
