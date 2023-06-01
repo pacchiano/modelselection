@@ -12,10 +12,10 @@ from experiment_parameters import get_experiment_info
 
 
 def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, parameters,  
-	modselalgo = "Corral", name = ""):
+	modselalgo = "Corral", name = "", grid = False, shared_data = False):
 	
 
-	if modselalgo in ["BalancingClassic", "DoublingDataDrivenBig", "EstimatingDataDrivenBig"]:
+	if grid:
 		dmin = 1
 		per_parameter_putative_bonds = [2**i*dmin for i in range(int(np.log(num_timesteps)))]
 		putative_bounds = per_parameter_putative_bonds*len(parameters)
@@ -71,16 +71,20 @@ def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, pa
 		#arms_played.append(play_arm)
 		
 		reward = bandit.get_reward(play_arm)
-		rewards.append(reward)
+		#rewards.append(reward)
 
 		modsel_info = dict([])
-		modsel_infos.append(modsel_info)
+		#modsel_infos.append(modsel_info)
 
-		base_algorithm.update_arm_statistics(play_arm, reward)
+
+
+		if shared_data:
+			[b.update_arm_statistics(play_arm, reward) for b in base_algorithms]
+		else:
+			base_algorithm.update_arm_statistics(play_arm, reward)
 		
-		mean_reward = bandit.get_arm_mean(play_arm)
-
-		pseudo_rewards.append(mean_reward)
+		# mean_reward = bandit.get_arm_mean(play_arm)
+		# pseudo_rewards.append(mean_reward)
 
 		
 		modsel_manager.update_distribution(modsel_sample_idx, reward, modsel_info )
@@ -89,17 +93,17 @@ def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, pa
 		instantaneous_regret = bandit.get_max_mean() - bandit.get_arm_mean(play_arm)
 		instantaneous_regrets.append(instantaneous_regret)
 
-		per_algorithm_regrets[modsel_sample_idx].append(instantaneous_regret)
+		#per_algorithm_regrets[modsel_sample_idx].append(instantaneous_regret)
 
 	result = dict([])
-	result["rewards"] = []#rewards
-	result["pseudo_rewards"] = []#pseudo_rewards
+	#result["rewards"] = []#rewards
+	#result["pseudo_rewards"] = []#pseudo_rewards
 	result["instantaneous_regrets"] = instantaneous_regrets
-	result["arms_played"] = []#arms_played
-	result["parameter_pulls"] = []# parameter_pulls
-	result["probabilities"] = []#probabilities
-	result["per_algorithm_regrets"] =[]# per_algorithm_regrets
-	result["modsel_infos"] = []#modsel_infos
+	#result["arms_played"] = []#arms_played
+	#result["parameter_pulls"] = []# parameter_pulls
+	#result["probabilities"] = []#probabilities
+	#result["per_algorithm_regrets"] =[]# per_algorithm_regrets
+	#result["modsel_infos"] = []#modsel_infos
 
 
 	return result
@@ -108,9 +112,9 @@ def run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, pa
 
 @ray.remote
 def run_experiments_remote(bandit, arm_set_type, get_base_algorithms, num_timesteps, parameters,  
-	modselalgo = "Corral", name = ""):
+	modselalgo = "Corral", name = "", grid = False, shared_data = False):
 	return run_experiments(bandit, arm_set_type, get_base_algorithms, num_timesteps, parameters,  
-	modselalgo = modselalgo, name = name)
+	modselalgo = modselalgo, name = name, grid = grid, shared_data = shared_data)
 
 
 
@@ -133,6 +137,8 @@ if __name__ == "__main__":
 	modselalgos_raw = str(sys.argv[4])
 	modselalgos = modselalgos_raw.split(",")
 	normalize = str(sys.argv[5]) == "True"
+	shared_data = str(sys.argv[6]) == "True"
+
 	# IPython.embed()
 	# raise ValueError("asdflkm")
 
@@ -235,10 +241,10 @@ if __name__ == "__main__":
 
 
 				for result in results:
-					rewards = result["rewards"]
-					mean_rewards = result["pseudo_rewards"]
+					#rewards = result["rewards"]
+					#mean_rewards = result["pseudo_rewards"]
 					instantaneous_regrets = result["instantaneous_regrets"]
-					arm_pulls = result["arms_played"]
+					#arm_pulls = result["arms_played"]
 
 
 					cum_regrets_all.append(np.cumsum(instantaneous_regrets))
@@ -262,8 +268,15 @@ if __name__ == "__main__":
 
 	final_mean_rewards_stds= dict([])
 	modsel_names = ""
+
+	### RUN MODEL SELECTION EXPERIMENTS
 	for modselalgo, i in zip(modselalgos, range(len(modselalgos))):
 	
+		### SET THE GRID FLAG TO THE APPROPRIATE VALUE
+		grid = False
+		if modselalgo == "BalancingClassic":
+			grid = True
+
 
 		modsel_names += modselalgo
 		modsel_cum_regrets_all = []	
@@ -271,11 +284,15 @@ if __name__ == "__main__":
 		probabilities_all = []
 		per_algorithm_regrets_stats = []
 
-		log_filename = "data_{}_{}_T{}".format(modselalgo, experiment_name, num_timesteps)
+		shared_data_tag = ""
+		if shared_data:
+			shared_data_tag = "-s"
+
+		log_filename = "data_{}{}_{}_T{}".format(modselalgo, shared_data_tag, experiment_name, num_timesteps)
 
 
 		if SAVE_ALL_RUN_DATA:
-			all_modsel_data_log_filename = "alldata_{}_{}_T{}".format(modselalgo, experiment_name, num_timesteps)
+			all_modsel_data_log_filename = "alldata_{}{}_{}_T{}".format(modselalgo, shared_data_tag, experiment_name, num_timesteps)
 
 		if FROM_FILE or os.path.exists("{}/{}.zip".format(exp_data_dir_T, log_filename)): 
 			(mean_modsel_cum_regrets, std_modsel_cum_regrets) = unzip_and_load_pickle(exp_data_dir_T, log_filename, is_zip_file = True, hash_filename  = False)
@@ -294,6 +311,8 @@ if __name__ == "__main__":
 								parameters,  
 								modselalgo = modselalgo, 
 								name = "{} modsel".format(experiment_name),
+								grid = grid,
+								shared_data = shared_data
 								) for _ in range(batch)]
 					partial_results = ray.get(partial_results)
 					results += partial_results
@@ -308,23 +327,25 @@ if __name__ == "__main__":
 							parameters,  
 							modselalgo = modselalgo, 
 							name = "{} modsel".format(experiment_name),
+							grid = grid,
+							shared_data = shared_data
 							)
 					results.append(result)
 
 
 			for result in results:
-				modsel_rewards = result["rewards"] 
-				modsel_mean_rewards = result["pseudo_rewards"] 
+				#modsel_rewards = result["rewards"] 
+				#modsel_mean_rewards = result["pseudo_rewards"] 
 				modsel_instantaneous_regrets = result["instantaneous_regrets"]
-				modsel_arm_pulls = result["arms_played"] 
-				modsel_confidence_radius_pulls = result["parameter_pulls"] 
-				probabilities_modsel = result["probabilities"] 
-				per_algorithm_regrets = result["per_algorithm_regrets"] 
+				#modsel_arm_pulls = result["arms_played"] 
+				#modsel_confidence_radius_pulls = result["parameter_pulls"] 
+				#probabilities_modsel = result["probabilities"] 
+				#per_algorithm_regrets = result["per_algorithm_regrets"] 
 				
 
 				modsel_cum_regrets_all.append(np.cumsum(modsel_instantaneous_regrets))
-				modsel_confidence_radius_pulls_all.append(modsel_confidence_radius_pulls)
-				per_algorithm_regrets_stats.append(per_algorithm_regrets)
+				#modsel_confidence_radius_pulls_all.append(modsel_confidence_radius_pulls)
+				#per_algorithm_regrets_stats.append(per_algorithm_regrets)
 
 
 			mean_modsel_cum_regrets = np.mean(modsel_cum_regrets_all,0)
@@ -359,6 +380,10 @@ if __name__ == "__main__":
 		else:
 			modselalgo_tag = modselalgo
 
+		### ADD THE SHARED DATA TAG
+		if shared_data:
+			modselalgo_tag += " -s"
+
 
 		### PLOTTING MODSEL REGRET
 		mean_modsel_at_zero = mean_modsel_cum_regrets[0]
@@ -373,7 +398,7 @@ if __name__ == "__main__":
 
 
 
-	mean_rewards_log_filename_stub = get_conditional_filename_hashing("final_mean_rewards_{}_{}_T{}".format(experiment_name, modsel_names, num_timesteps))
+	mean_rewards_log_filename_stub = get_conditional_filename_hashing("final_mean_rewards_{}_{}{}_T{}".format(experiment_name, modsel_names, shared_data_tag, num_timesteps))
 
 	final_mean_rewards_log_filename = "{}/{}.txt".format(exp_data_dir_T, mean_rewards_log_filename_stub)
 	
@@ -414,7 +439,7 @@ if __name__ == "__main__":
 	#plt.ylim(0,1.5)
 	
 	if normalize:
-		plot_name_stub = get_conditional_filename_hashing("norm_{}_{}_T{}".format(experiment_name, modsel_names,num_timesteps))
+		plot_name_stub = get_conditional_filename_hashing("norm_{}_{}{}_T{}".format(experiment_name, modsel_names, shared_data_tag, num_timesteps))
 		plot_name = "{}/{}.pdf".format(exp_data_dir_T, plot_name_stub)
 
 		plt.ylabel("Regret Scale", fontsize =13)
@@ -425,7 +450,7 @@ if __name__ == "__main__":
 
 	else:
 		plt.ylabel("Cumulative Regret", fontsize =13)
-		plot_name_stub = get_conditional_filename_hashing("{}_{}_T{}".format(experiment_name, modsel_names,num_timesteps))
+		plot_name_stub = get_conditional_filename_hashing("{}_{}{}_T{}".format(experiment_name, modsel_names, shared_data_tag, num_timesteps))
 		plot_name = "{}/{}.pdf".format(exp_data_dir_T, plot_name_stub)
 
 		if plot_bbox:
