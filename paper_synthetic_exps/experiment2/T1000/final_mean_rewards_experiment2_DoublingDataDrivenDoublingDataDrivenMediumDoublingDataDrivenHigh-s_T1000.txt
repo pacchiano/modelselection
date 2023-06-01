@@ -1,0 +1,3 @@
+DoublingDataDriven (242, 10)
+DoublingDataDrivenMedium (240, 10)
+DoublingDataDrivenHigh (262, 7)
