@@ -29,7 +29,7 @@ for experiment in "${experiments1000[@]}";
 do
 	python experiments_synthetic.py 1000 $experiment $num_experiments $allmodselalgos,$allmodselalgos_shared True;
 	python experiments_synthetic.py 1000 $experiment $num_experiments $corralvariants,$corralvariants_shared True;	
-	python experiments_synthetic.py 1000 $experiment $num_experiments $exp3variants,$exp3variants_shared True;
+d	python experiments_synthetic.py 1000 $experiment $num_experiments $exp3variants,$exp3variants_shared True;
 	python experiments_synthetic.py 1000 $experiment $num_experiments $doublingvariants,$doublingvariants_shared True;
 	python experiments_synthetic.py 1000 $experiment $num_experiments $estimatedvariants,$estimatedvariants_shared True;
 	python experiments_synthetic.py 1000 $experiment $num_experiments $papervariants,$papervariants_shared True;
