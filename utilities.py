@@ -123,3 +123,32 @@ def read_dictionary_file(filename):
   return dictionary
 
 
+
+
+
+### the assumption is 
+def write_tuple_file(tuple_data, filename):
+  with open(filename, "w") as f:
+    text = str(tuple_data[0])
+
+    for i in range(1,len(tuple_data)):
+      text += " {}".format(tuple_data[i])
+    f.write(text)
+    f.close()
+
+
+
+### the assumption is the input is of length 3
+def read_tuple_file(filename):
+  list_result = []
+  with open(filename, "r") as f:
+    line = f.readlines()[0]
+
+    elements = line.split(" ")
+    algo_name = elements[0]
+    mean_val = int(elements[1])
+    std_val = int(elements[2])
+  f.close()
+  return (algo_name, mean_val, std_val)
+
+

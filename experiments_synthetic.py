@@ -6,7 +6,7 @@ import os
 import ray
 import IPython
 from algorithmsmodsel import get_modsel_manager
-from utilities import pickle_and_zip, unzip_and_load_pickle, produce_parallelism_schedule, write_dictionary_file, get_conditional_filename_hashing
+from utilities import pickle_and_zip, unzip_and_load_pickle, produce_parallelism_schedule, write_dictionary_file, get_conditional_filename_hashing, write_tuple_file
 from experiment_parameters import get_experiment_info
 
 
@@ -119,6 +119,35 @@ def run_experiments_remote(bandit, arm_set_type, get_base_algorithms, num_timest
 
 
 
+def get_modselalgo_tag(modselalgo, shared_data, grid):
+	### PLOT THE MODEL SELECTION REGRETS
+	if modselalgo == "EstimatingDataDriven":
+		modselalgo_tag = r'$\mathrm{E}\mathrm{D}^2\mathrm{RB}$'
+	elif modselalgo == "DoublingDataDriven":
+		modselalgo_tag = r'$\mathrm{D}^3\mathrm{RB}$'
+	elif modselalgo == "EstimatingDataDrivenBig":
+		modselalgo_tag = r'$\mathrm{E}\mathrm{D}^2\mathrm{RB}$ Grid'
+	elif modselalgo == "DoublingDataDrivenBig":
+		modselalgo_tag = r'$\mathrm{D}^3\mathrm{RB}$ Grid'
+	elif modselalgo == "BalancingClassic":
+		modselalgo_tag = "RB Grid"
+	else:
+		modselalgo_tag = modselalgo
+
+	### ADD THE SHARED DATA TAG
+	if shared_data and not grid:
+		modselalgo_tag += " -s"
+	elif shared_data and grid:
+		modselalgo_tag += " -gs"
+	elif not shared_data and grid:
+		modselalgo_tag += " -g"
+	else:
+		modselalgo_tag += ""
+
+	return modselalgo_tag
+
+
+
 
 if __name__ == "__main__":
 
@@ -130,17 +159,46 @@ if __name__ == "__main__":
 	MAX_PARALLELISM = 2000
 
 
-
 	num_timesteps = int(sys.argv[1])
 	exp_type = str(sys.argv[2])
 	num_experiments = int(sys.argv[3])
 	modselalgos_raw = str(sys.argv[4])
-	modselalgos = modselalgos_raw.split(",")
-	normalize = str(sys.argv[5]) == "True"
-	shared_data = str(sys.argv[6]) == "True"
+	modselalgos_info_split = modselalgos_raw.split(",")
 
-	# IPython.embed()
-	# raise ValueError("asdflkm")
+	modselalgos = []
+	modselalgos_shared_data_flags = []
+	modselalgos_grid_flags = []
+	data_tags = []
+
+	### Extract the modselalgos flags
+	for modselalgo_with_tag in modselalgos_info_split:
+		split_modselalgo = modselalgo_with_tag.split("-")
+		modselalgos.append(split_modselalgo[0])
+		data_tag=""
+		if len(split_modselalgo) > 1:
+			flag = split_modselalgo[1]
+			data_tag += "-{}".format(flag)
+			### shared data is on.
+			if flag == "s":
+				 modselalgos_shared_data_flags.append(True)
+				 modselalgos_grid_flags.append(False)
+			elif flag == "gs":
+				 modselalgos_shared_data_flags.append(True)
+				 modselalgos_grid_flags.append(True)
+			elif flag == "g":
+				 modselalgos_shared_data_flags.append(False)
+				 modselalgos_grid_flags.append(True)
+			else:
+				raise ValueError("unrecognized flag: {} --- valid flags are only -s, -gs, -g".format(flag))
+		else:
+			modselalgos_shared_data_flags.append(False)
+			modselalgos_grid_flags.append(False)
+
+		data_tags.append(data_tag)
+
+	normalize = str(sys.argv[5]) == "True"
+
+	#IPython.embed()
 
 
 	print("Starting experiment {}".format(exp_type))
@@ -187,8 +245,9 @@ if __name__ == "__main__":
 	exp_data_dir_T = "{}/T{}".format(exp_data_dir, num_timesteps)
 	if not os.path.exists(exp_data_dir_T):
 		os.mkdir(exp_data_dir_T)
-
-
+		final_means_dir = "{}/T{}/final_means".format(exp_data_dir, num_timesteps)
+		os.mkdir(final_means_dir)
+		
 
 	colors = ["red", "orange", "violet", "black", "brown", "yellow", "green", "gray", "cyan", "purple", 
 	"darkkhaki", "salmon", "aquamarine", "sienna", "darkorchid", "mediumturquoise", "darkorange"]*10	
@@ -221,7 +280,6 @@ if __name__ == "__main__":
 	else:
 		for parameter, i in zip(reduced_parameters, range(len(reduced_parameters))):
 				cum_regrets_all = []	
-				#confidence_radius_pulls_all = []
 
 				results = []
 				if USE_RAY:
@@ -266,16 +324,18 @@ if __name__ == "__main__":
 		pickle_and_zip(baselines_results, log_filename, exp_data_dir_T, is_zip_file = True, hash_filename  = False)
 
 
-	final_mean_rewards_stds= dict([])
+	#final_mean_rewards_stds= dict([])
 	modsel_names = ""
 
 	### RUN MODEL SELECTION EXPERIMENTS
 	for modselalgo, i in zip(modselalgos, range(len(modselalgos))):
 	
-		### SET THE GRID FLAG TO THE APPROPRIATE VALUE
-		grid = False
-		if modselalgo == "BalancingClassic":
-			grid = True
+
+
+		# ### SET THE GRID FLAG TO THE APPROPRIATE VALUE
+		# grid = False
+		# if modselalgo == "BalancingClassic":
+		# 	grid = True
 
 
 		modsel_names += modselalgo
@@ -284,15 +344,12 @@ if __name__ == "__main__":
 		probabilities_all = []
 		per_algorithm_regrets_stats = []
 
-		shared_data_tag = ""
-		if shared_data:
-			shared_data_tag = "-s"
 
-		log_filename = "data_{}{}_{}_T{}".format(modselalgo, shared_data_tag, experiment_name, num_timesteps)
+		log_filename = "data_{}{}_{}_T{}".format(modselalgo, data_tags[i], experiment_name, num_timesteps)
 
 
 		if SAVE_ALL_RUN_DATA:
-			all_modsel_data_log_filename = "alldata_{}{}_{}_T{}".format(modselalgo, shared_data_tag, experiment_name, num_timesteps)
+			all_modsel_data_log_filename = "alldata_{}{}_{}_T{}".format(modselalgo, data_tags[i], experiment_name, num_timesteps)
 
 		if FROM_FILE or os.path.exists("{}/{}.zip".format(exp_data_dir_T, log_filename)): 
 			(mean_modsel_cum_regrets, std_modsel_cum_regrets) = unzip_and_load_pickle(exp_data_dir_T, log_filename, is_zip_file = True, hash_filename  = False)
@@ -311,8 +368,8 @@ if __name__ == "__main__":
 								parameters,  
 								modselalgo = modselalgo, 
 								name = "{} modsel".format(experiment_name),
-								grid = grid,
-								shared_data = shared_data
+								grid = modselalgos_grid_flags[i],
+								shared_data = modselalgos_shared_data_flags[i]
 								) for _ in range(batch)]
 					partial_results = ray.get(partial_results)
 					results += partial_results
@@ -327,25 +384,15 @@ if __name__ == "__main__":
 							parameters,  
 							modselalgo = modselalgo, 
 							name = "{} modsel".format(experiment_name),
-							grid = grid,
-							shared_data = shared_data
+							grid = modselalgos_grid_flags[i],
+							shared_data = modselalgos_shared_data_flags[i]
 							)
 					results.append(result)
 
 
 			for result in results:
-				#modsel_rewards = result["rewards"] 
-				#modsel_mean_rewards = result["pseudo_rewards"] 
 				modsel_instantaneous_regrets = result["instantaneous_regrets"]
-				#modsel_arm_pulls = result["arms_played"] 
-				#modsel_confidence_radius_pulls = result["parameter_pulls"] 
-				#probabilities_modsel = result["probabilities"] 
-				#per_algorithm_regrets = result["per_algorithm_regrets"] 
-				
-
 				modsel_cum_regrets_all.append(np.cumsum(modsel_instantaneous_regrets))
-				#modsel_confidence_radius_pulls_all.append(modsel_confidence_radius_pulls)
-				#per_algorithm_regrets_stats.append(per_algorithm_regrets)
 
 
 			mean_modsel_cum_regrets = np.mean(modsel_cum_regrets_all,0)
@@ -358,7 +405,16 @@ if __name__ == "__main__":
 
 
 
-		final_mean_rewards_stds[modselalgo] = (int(mean_modsel_cum_regrets[-1]), int(2*std_modsel_cum_regrets[-1]/np.sqrt(num_experiments)))
+		#final_mean_rewards_stds[modselalgo] = (int(mean_modsel_cum_regrets[-1]), int(2*std_modsel_cum_regrets[-1]/np.sqrt(num_experiments)))
+		final_mean_stds_tuple_data = (int(mean_modsel_cum_regrets[-1]), int(2*std_modsel_cum_regrets[-1]/np.sqrt(num_experiments)))
+
+
+
+
+		#### WRITE THE FINAL MEAN FILE FOR THIS MODSELALGO
+		mean_rewards_log_filename_stub = get_conditional_filename_hashing("final_mean_rewards_{}_{}{}_T{}".format(experiment_name, modselalgo, data_tags[i], num_timesteps))
+		final_mean_rewards_log_filename = "{}/final_means/{}.txt".format(exp_data_dir_T, mean_rewards_log_filename_stub)	
+		write_tuple_file(final_mean_stds_tuple_data, final_mean_rewards_log_filename)
 
 
 		if normalize:
@@ -366,23 +422,8 @@ if __name__ == "__main__":
 			std_modsel_cum_regrets *= normalization_visualization
 
 
-		### PLOT THE MODEL SELECTION REGRETS
-		if modselalgo == "EstimatingDataDriven":
-			modselalgo_tag = r'$\mathrm{E}\mathrm{D}^2\mathrm{RB}$'
-		elif modselalgo == "DoublingDataDriven":
-			modselalgo_tag = r'$\mathrm{D}^3\mathrm{RB}$'
-		elif modselalgo == "EstimatingDataDrivenBig":
-			modselalgo_tag = r'$\mathrm{E}\mathrm{D}^2\mathrm{RB}$ Grid'
-		elif modselalgo == "DoublingDataDrivenBig":
-			modselalgo_tag = r'$\mathrm{D}^3\mathrm{RB}$ Grid'
-		elif modselalgo == "BalancingClassic":
-			modselalgo_tag = "RB Grid"
-		else:
-			modselalgo_tag = modselalgo
+		modselalgo_tag = get_modselalgo_tag(modselalgo, modselalgos_shared_data_flags[i], modselalgos_grid_flags[i])
 
-		### ADD THE SHARED DATA TAG
-		if shared_data:
-			modselalgo_tag += " -s"
 
 
 		### PLOTTING MODSEL REGRET
@@ -397,14 +438,6 @@ if __name__ == "__main__":
 			subsampled_mean_modsel_cum_regrets +std_plot_multiplier*subsampled_std_modsel_cum_regrets, color = colors[i], alpha = .1   )
 
 
-
-	mean_rewards_log_filename_stub = get_conditional_filename_hashing("final_mean_rewards_{}_{}{}_T{}".format(experiment_name, modsel_names, shared_data_tag, num_timesteps))
-
-	final_mean_rewards_log_filename = "{}/{}.txt".format(exp_data_dir_T, mean_rewards_log_filename_stub)
-	
-
-
-	write_dictionary_file(final_mean_rewards_stds, final_mean_rewards_log_filename)
 
 
 	### PLOT THE BASE LEARNER'S MEAN REGRETS.
@@ -436,10 +469,9 @@ if __name__ == "__main__":
 		plt.legend( loc="upper left", fontsize = 9.8)
 
 	plt.xlabel("Rounds", fontsize =13)
-	#plt.ylim(0,1.5)
 	
 	if normalize:
-		plot_name_stub = get_conditional_filename_hashing("norm_{}_{}{}_T{}".format(experiment_name, modsel_names, shared_data_tag, num_timesteps))
+		plot_name_stub = get_conditional_filename_hashing("norm_{}_{}_T{}".format(experiment_name, modselalgos_raw, num_timesteps))
 		plot_name = "{}/{}.pdf".format(exp_data_dir_T, plot_name_stub)
 
 		plt.ylabel("Regret Scale", fontsize =13)
@@ -450,7 +482,7 @@ if __name__ == "__main__":
 
 	else:
 		plt.ylabel("Cumulative Regret", fontsize =13)
-		plot_name_stub = get_conditional_filename_hashing("{}_{}{}_T{}".format(experiment_name, modsel_names, shared_data_tag, num_timesteps))
+		plot_name_stub = get_conditional_filename_hashing("{}_{}_T{}".format(experiment_name, modsel_names, num_timesteps))
 		plot_name = "{}/{}.pdf".format(exp_data_dir_T, plot_name_stub)
 
 		if plot_bbox:
