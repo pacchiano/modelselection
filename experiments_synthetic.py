@@ -245,10 +245,13 @@ if __name__ == "__main__":
 	exp_data_dir_T = "{}/T{}".format(exp_data_dir, num_timesteps)
 	if not os.path.exists(exp_data_dir_T):
 		os.mkdir(exp_data_dir_T)
-		final_means_dir = "{}/T{}/final_means".format(exp_data_dir, num_timesteps)
+		#final_means_dir = "{}/T{}/final_means".format(exp_data_dir, num_timesteps)
+	
+	final_means_dir = "{}/T{}/final_means".format(exp_data_dir, num_timesteps)
+	if not os.path.exists(final_means_dir):
 		os.mkdir(final_means_dir)
 		
-
+		
 	colors = ["red", "orange", "violet", "black", "brown", "yellow", "green", "gray", "cyan", "purple", 
 	"darkkhaki", "salmon", "aquamarine", "sienna", "darkorchid", "mediumturquoise", "darkorange"]*10	
 
