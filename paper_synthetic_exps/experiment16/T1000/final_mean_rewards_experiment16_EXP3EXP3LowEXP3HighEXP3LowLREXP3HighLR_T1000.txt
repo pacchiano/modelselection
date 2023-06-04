@@ -1,5 +1,0 @@
-EXP3 (4973, 5)
-EXP3Low (4971, 5)
-EXP3High (4968, 5)
-EXP3LowLR (4977, 4)
-EXP3HighLR (4959, 8)

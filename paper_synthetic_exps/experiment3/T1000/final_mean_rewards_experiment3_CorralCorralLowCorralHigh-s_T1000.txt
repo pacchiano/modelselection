@@ -1,3 +1,0 @@
-Corral (711, 14)
-CorralLow (1313, 14)
-CorralHigh (1021, 44)

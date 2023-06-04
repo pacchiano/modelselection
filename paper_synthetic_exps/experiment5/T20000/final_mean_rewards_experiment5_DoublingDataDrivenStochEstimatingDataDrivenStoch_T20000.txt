@@ -1,2 +1,0 @@
-DoublingDataDrivenStoch (13699, 4476)
-EstimatingDataDrivenStoch (8663, 2737)

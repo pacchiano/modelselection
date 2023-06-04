@@ -1,7 +1,0 @@
-DoublingDataDriven (254, 130)
-EstimatingDataDriven (433, 177)
-Corral (689, 73)
-BalancingClassic (651, 109)
-UCB (1030, 93)
-Greedy (534, 213)
-EXP3 (823, 234)
