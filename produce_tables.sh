@@ -6,26 +6,29 @@ experiments20000=experiment1,experiment2,experiment3,experiment4,experiment5,exp
 
 experiments100000=experiment16
 
-allmodselalgos=DoublingDataDriven,EstimatingDataDriven,Corral,BalancingClassic,UCB,Greedy,EXP3,CorralLow,CorralHigh,EXP3Low,EXP3High,EXP3LowLR,EXP3HighLR,DoublingDataDrivenMedium,EstimatingDataDrivenMedium,DoublingDataDrivenHigh,EstimatingDataDrivenHigh,CorralSuperHigh,DoublingDataDrivenSuperHigh,EstimatingDataDrivenSuperHigh
-corralvariants=Corral,CorralLow,CorralHigh,CorralSuperHigh
+
+allmodselalgos=DoublingDataDriven,EstimatingDataDriven,Corral,BalancingClassic-g,UCB,Greedy,EXP3,CorralLow,CorralHigh,EXP3Low,EXP3High,EXP3LowLR,EXP3HighLR,DoublingDataDrivenMedium,EstimatingDataDrivenMedium,DoublingDataDrivenHigh,EstimatingDataDrivenHigh,CorralSuperHigh,DoublingDataDrivenSuperHigh,EstimatingDataDrivenSuperHigh
+allmodselalgos_shared=DoublingDataDriven-s,EstimatingDataDriven-s,Corral-s,BalancingClassic-gs,UCB-s,Greedy-s,EXP3-s,CorralLow-s,CorralHigh-s,EXP3Low-s,EXP3High-s,EXP3LowLR-s,EXP3HighLR-s,DoublingDataDrivenMedium-s,EstimatingDataDrivenMedium-s,DoublingDataDrivenHigh-s,EstimatingDataDrivenHigh-s,CorralSuperHigh-s,DoublingDataDrivenSuperHigh-s,EstimatingDataDrivenSuperHigh-s
+corralvariants=Corral,CorralLow,CorralHigh
+corralvariants_shared=Corral-s,CorralLow-s,CorralHigh-s
 exp3variants=EXP3,EXP3Low,EXP3High,EXP3LowLR,EXP3HighLR
-doublingvariants=DoublingDataDriven,DoublingDataDrivenMedium,DoublingDataDrivenHigh,DoublingDataDrivenSuperHigh
-estimatedvariants=EstimatingDataDriven,EstimatingDataDrivenMedium,EstimatingDataDrivenHigh,EstimatingDataDrivenSuperHigh
-papervariants=DoublingDataDriven,EstimatingDataDriven,Corral,BalancingClassic,UCB,Greedy,EXP3
+exp3variants_shared=EXP3-s,EXP3Low-s,EXP3High-s,EXP3LowLR-s,EXP3HighLR-s
+doublingvariants=DoublingDataDriven,DoublingDataDrivenMedium,DoublingDataDrivenHigh
+doublingvariants_shared=DoublingDataDriven-s,DoublingDataDrivenMedium-s,DoublingDataDrivenHigh-s
+estimatedvariants=EstimatingDataDriven,EstimatingDataDrivenMedium,EstimatingDataDrivenHigh
+estimatedvariants_shared=EstimatingDataDriven-s,EstimatingDataDrivenMedium-s,EstimatingDataDrivenHigh-s
+papervariants=DoublingDataDriven,EstimatingDataDriven,Corral,BalancingClassic-g,UCB,Greedy,EXP3
+papervariants_shared=DoublingDataDriven-s,EstimatingDataDriven-s,Corral-s,BalancingClassic-gs,UCB-s,Greedy-s,EXP3-s
+superhigh=CorralSuperHigh,DoublingDataDrivenSuperHigh,EstimatingDataDrivenSuperHigh
+superhigh_shared=CorralSuperHigh-s,DoublingDataDrivenSuperHigh-s,EstimatingDataDrivenSuperHigh-s
+
+
+python table_write.py 1000 $experiments1000 $num_experiments $allmodselalgos,$allmodselalgos_shared
+# python table_write.py 1000 $experiments1000 $num_experiments $corralvariants,$corralvariants_shared
+# python table_write.py 1000 $experiments1000 $num_experiments $exp3variants,$exp3variants_shared
+# python table_write.py 1000 $experiments1000 $num_experiments $doublingvariants,$doublingvariants_shared
+# python table_write.py 1000 $experiments1000 $num_experiments $estimatedvariants,$estimatedvariants_shared
+# python table_write.py 1000 $experiments1000 $num_experiments $papervariants,$papervariants_shared
+
+
 #bash commit.sh;
-
-
-# python table_write.py 1000 $experiments1000 $num_experiments $allmodselalgos $allmodselalgos True;
-# python table_write.py 1000 $experiments1000 $num_experiments $allmodselalgos $corralvariants True;	
-
-
-
-python table_write.py 20000 $experiments20000 $num_experiments $allmodselalgos $allmodselalgos True;
-python table_write.py 20000 $experiments20000 $num_experiments $allmodselalgos $corralvariants True;	
-python table_write.py 20000 $experiments20000 $num_experiments $allmodselalgos $papervariants True;	
-
-
-python table_write.py 100000 $experiments100000 $num_experiments $allmodselalgos $allmodselalgos True;
-python table_write.py 100000 $experiments100000 $num_experiments $allmodselalgos $corralvariants True;	
-python table_write.py 100000 $experiments100000 $num_experiments $allmodselalgos $papervariants True;	
-
