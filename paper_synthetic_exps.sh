@@ -36,34 +36,34 @@ do
 	python experiments_synthetic.py 1000 $experiment $num_experiments $stochsamplingvariants,$stochsamplingvariants_shared True;
 done
 
-# bash commit.sh;
+bash commit.sh;
 
 
 
-# for experiment in "${experiments20000[@]}"; 
-# do
-# 	python experiments_synthetic.py 20000 $experiment $num_experiments $allmodselalgos,$allmodselalgos_shared True;
-# 	python experiments_synthetic.py 20000 $experiment $num_experiments $corralvariants,$corralvariants_shared True;	
-# 	python experiments_synthetic.py 20000 $experiment $num_experiments $exp3variants,$exp3variants_shared True;
-# 	python experiments_synthetic.py 20000 $experiment $num_experiments $doublingvariants,$doublingvariants_shared True;
-# 	python experiments_synthetic.py 20000 $experiment $num_experiments $estimatedvariants,$estimatedvariants_shared True;
-# 	python experiments_synthetic.py 20000 $experiment $num_experiments $papervariants,$papervariants_shared True;
-# 	python experiments_synthetic.py 20000 $experiment $num_experiments $stochsamplingvariants,$stochsamplingvariants_shared True;
-# done
+for experiment in "${experiments20000[@]}"; 
+do
+	python experiments_synthetic.py 20000 $experiment $num_experiments $allmodselalgos,$allmodselalgos_shared True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $corralvariants,$corralvariants_shared True;	
+	python experiments_synthetic.py 20000 $experiment $num_experiments $exp3variants,$exp3variants_shared True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $doublingvariants,$doublingvariants_shared True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $estimatedvariants,$estimatedvariants_shared True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $papervariants,$papervariants_shared True;
+	python experiments_synthetic.py 20000 $experiment $num_experiments $stochsamplingvariants,$stochsamplingvariants_shared True;
+done
 
-# bash commit.sh;
+bash commit.sh;
 
 
-# for experiment in "${experiments100000[@]}"; 
-# do
-# 	python experiments_synthetic.py 100000 $experiment $num_experiments $allmodselalgos,$allmodselalgos_shared True;
-# 	python experiments_synthetic.py 100000 $experiment $num_experiments $corralvariants,$corralvariants_shared True;	
-# 	python experiments_synthetic.py 100000 $experiment $num_experiments $exp3variants,$exp3variants_shared True;
-# 	python experiments_synthetic.py 100000 $experiment $num_experiments $doublingvariants,$doublingvariants_shared True;
-# 	python experiments_synthetic.py 100000 $experiment $num_experiments $estimatedvariants,$estimatedvariants_shared True;
-# 	python experiments_synthetic.py 100000 $experiment $num_experiments $papervariants,$papervariants_shared True;
-# 	python experiments_synthetic.py 100000 $experiment $num_experiments $stochsamplingvariants,$stochsamplingvariants_shared True;
+for experiment in "${experiments100000[@]}"; 
+do
+	python experiments_synthetic.py 100000 $experiment $num_experiments $allmodselalgos,$allmodselalgos_shared True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $corralvariants,$corralvariants_shared True;	
+	python experiments_synthetic.py 100000 $experiment $num_experiments $exp3variants,$exp3variants_shared True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $doublingvariants,$doublingvariants_shared True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $estimatedvariants,$estimatedvariants_shared True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $papervariants,$papervariants_shared True;
+	python experiments_synthetic.py 100000 $experiment $num_experiments $stochsamplingvariants,$stochsamplingvariants_shared True;
 
-# done
+done
 
-# bash commit.sh;
+bash commit.sh;

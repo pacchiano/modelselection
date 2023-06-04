@@ -122,17 +122,18 @@ if __name__ == "__main__":
 	                 cellLoc='center',
 	                 colLabels=column_names,
 	                 rowLabels=row_names,
-	                 loc='center')
+	                 loc='center'
+	                )
 
 	# Modify the appearance of the table
 	table.auto_set_font_size(False)
-	table.set_fontsize(14)
+	table.set_fontsize(1)
 	table.scale(1.2, 1.2)
 
 	# Hide the axis and axis labels
 	ax.axis('off')
 
-	figure_name = "{}_{}".format(exp_types_original, original_modselalgos)
+	figure_name = get_conditional_filename_hashing("{}_{}".format(exp_types_original, original_modselalgos))
 	
 	figure_file_name = "{}/{}.pdf".format(table_data_dir, figure_name)
 	# Show the plot
