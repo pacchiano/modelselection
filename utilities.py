@@ -145,10 +145,10 @@ def read_tuple_file(filename):
     line = f.readlines()[0]
 
     elements = line.split(" ")
-    algo_name = elements[0]
-    mean_val = int(elements[1])
-    std_val = int(elements[2])
+    #algo_name = elements[0]
+    mean_val = int(elements[0])
+    std_val = int(elements[1])
   f.close()
-  return (algo_name, mean_val, std_val)
+  return [mean_val, std_val]
 
 

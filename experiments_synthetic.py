@@ -250,8 +250,12 @@ if __name__ == "__main__":
 	final_means_dir = "{}/T{}/final_means".format(exp_data_dir, num_timesteps)
 	if not os.path.exists(final_means_dir):
 		os.mkdir(final_means_dir)
+
+	plots_dir = "{}/T{}/plots".format(exp_data_dir, num_timesteps)
+	if not os.path.exists(plots_dir):
+		os.mkdir(plots_dir)
 		
-		
+
 	colors = ["red", "orange", "violet", "black", "brown", "yellow", "green", "gray", "cyan", "purple", 
 	"darkkhaki", "salmon", "aquamarine", "sienna", "darkorchid", "mediumturquoise", "darkorange"]*10	
 
@@ -475,7 +479,7 @@ if __name__ == "__main__":
 	
 	if normalize:
 		plot_name_stub = get_conditional_filename_hashing("norm_{}_{}_T{}".format(experiment_name, modselalgos_raw, num_timesteps))
-		plot_name = "{}/{}.pdf".format(exp_data_dir_T, plot_name_stub)
+		plot_name = "{}/{}.pdf".format(plots_dir, plot_name_stub)
 
 		plt.ylabel("Regret Scale", fontsize =13)
 		if plot_bbox:
@@ -486,7 +490,7 @@ if __name__ == "__main__":
 	else:
 		plt.ylabel("Cumulative Regret", fontsize =13)
 		plot_name_stub = get_conditional_filename_hashing("{}_{}_T{}".format(experiment_name, modsel_names, num_timesteps))
-		plot_name = "{}/{}.pdf".format(exp_data_dir_T, plot_name_stub)
+		plot_name = "{}/{}.pdf".format(plots_dir, plot_name_stub)
 
 		if plot_bbox:
 			plt.savefig(plot_name, bbox_inches='tight')

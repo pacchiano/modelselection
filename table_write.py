@@ -8,12 +8,13 @@ import os
 
 
 import IPython
-from utilities import read_dictionary_file, get_conditional_filename_hashing
+from utilities import read_tuple_file, get_conditional_filename_hashing
 from experiment_parameters import get_experiment_info
-
+from experiments_synthetic import get_modselalgo_tag#(modselalgo, shared_data, grid)
 
 
 if __name__ == "__main__":
+
 
 
 
@@ -22,133 +23,120 @@ if __name__ == "__main__":
 	exp_types_original = str(sys.argv[2])
 	exp_types = exp_types_original.split(",")
 	num_experiments = int(sys.argv[3])
-	all_modselalgos = str(sys.argv[4])
-	all_modselalgos = all_modselalgos.split(",")
-
-	modselalgos = str(sys.argv[5])
-	modselalgos = modselalgos.split(",")
-
-
-	all_modsel_names = ""
-	for modselalgo in all_modselalgos:
-		all_modsel_names += modselalgo
-
-
-	table_code = """
-		\\begin{landscape}
-		\\begin{table}[t]
-		\\caption{
-		}
-		\\hspace{-.5cm}
-		\\scalebox{0.5}{
-		\\bgroup
-		\\def\\arraystretch{1.1}
-
-		"""
-
-
-	table_code += "\\begin{tabular}{|l |"
-
-	table_code += "c|"*len(modselalgos) + "}\n" 
-	table_code += "\\hline \n"
-	table_code +=  "Name "
+	original_modselalgos = str(sys.argv[4])
+	modselalgos = original_modselalgos.split(",")
 
 
 
-	modsel_names = ""
-	for modselalgo in modselalgos:
-		modsel_names += modselalgo
-		table_code += "& " + modselalgo + " "
+	#final_modselalgos_names = [get_modselalgo_tag(modselalgo, shared_data, grid) for modselalgo in modselalgos]
 
-	table_code += "\\\\\n \\hline \n"
+
 
 	path = os.getcwd()
 
-
 	table_data_dir = "{}/paper_synthetic_exps/tables/T{}".format(path, num_timesteps)
+
+
 
 	if not os.path.exists(table_data_dir):
 		os.mkdir(table_data_dir)
 
 
+	mean_data_matrix = np.zeros((len(exp_types), len(modselalgos)))
+	std_data_matrix = np.zeros((len(exp_types), len(modselalgos)))
 
-
-
-
-	for exp_type in exp_types:
-
-
-		experiment_info = get_experiment_info(exp_type)
-
-		experiment_name = experiment_info["experiment_name"]
-
-
-		exp_data_dir = "{}/paper_synthetic_exps/{}".format(path, experiment_name)
-
-		if not os.path.exists(exp_data_dir):
-			raise ValueError("{} does not exist".format(exp_data_dir))
-
-
-		exp_data_dir_T = "{}/T{}".format(exp_data_dir, num_timesteps)
-		if not os.path.exists(exp_data_dir_T):
-			raise ValueError("{} does not exist".format(exp_data_dir_T))
-
-
-		mean_rewards_log_filename_stub = get_conditional_filename_hashing("final_mean_rewards_{}_{}_T{}".format(experiment_name, 
-			all_modsel_names, num_timesteps))
-
-		final_mean_rewards_log_filename = "{}/{}.txt".format(exp_data_dir_T, mean_rewards_log_filename_stub)
-		
-
-		#### Load data
-		dictionary = read_dictionary_file(final_mean_rewards_log_filename)
-		print("exp type {}".format(exp_type))
-		print(dictionary)
-
-		### Find the smallest mean
-		smallest_mean = float("inf")
-		smallest_modselalgo = ""
-		for modselalgo in modselalgos:
-			if dictionary[modselalgo][0] < smallest_mean:
-				smallest_mean = dictionary[modselalgo][0]
-				smallest_modselalgo = modselalgo
-
-
-
-		table_code += experiment_name + " "
-		for modselalgo in modselalgos:
-			(mean, std) = dictionary[modselalgo]
-			if modselalgo == smallest_modselalgo:
-				table_code += "& {$\\bf " + str(mean) + "\\pm "+  str(std) + " $}" 
-			else:
-				table_code += "& {$" + str(mean) + "\\pm "+  str(std) + " $}" 
-
-		table_code += "\\\\\n"
-
-
-	table_code += "\\hline \n \\end{tabular}"
-
-
-
-	table_code += """
-		\\egroup
-		}
-		\\vspace{1mm}
-		\\end{table}
-		\\end{landscape}
-		"""
-
-	resulting_filename_stub = get_conditional_filename_hashing("table_{}_{}".format(exp_types_original,modsel_names), tolerance = 40)
 	#IPython.embed()
-	resulting_filename = "{}/{}.tex".format(table_data_dir, resulting_filename_stub)
+
+	for i,exp_type in enumerate(exp_types):
+		results = []
+		print("exp type {}".format(exp_type))
+
+		for j,modselalgo in enumerate(modselalgos):
+
+			experiment_info = get_experiment_info(exp_type)
+			experiment_name = experiment_info["experiment_name"]
+
+			exp_data_dir = "{}/paper_synthetic_exps/{}".format(path, experiment_name)
+			#exp_data_dir = "{}/paper_synthetic_exps/{}".format(path, experiment_name)
+
+			if not os.path.exists(table_data_dir):
+				raise ValueError("{} does not exist".format(table_data_dir))
+
+
+			exp_data_dir_T = "{}/T{}/final_means".format(exp_data_dir, num_timesteps)
+			if not os.path.exists(exp_data_dir_T):
+				raise ValueError("{} does not exist".format(exp_data_dir_T))
+
+
+			mean_rewards_log_filename_stub = get_conditional_filename_hashing("final_mean_rewards_{}_{}_T{}".format(experiment_name, 
+				modselalgo, num_timesteps))
+
+			final_mean_rewards_log_filename = "{}/{}.txt".format(exp_data_dir_T, mean_rewards_log_filename_stub)
+
+
+			#### Load data
+			(mean, std) = read_tuple_file(final_mean_rewards_log_filename)
+
+			# if len(exp_types) == 1:
+			# 	mean_data_matrix[j] = mean
+			# 	std_data_matrix[j] = std
+
+			# else:
+			mean_data_matrix[i,j] = mean
+			std_data_matrix[i,j] = std
 
 
 
+	column_names = modselalgos
+	row_names = exp_types
+
+	### Create the data matrix
+	data_matrix = []
+	colors = [["white"]*len(modselalgos)]*len(exp_types)
+	for i in range(len(exp_types)):
+		data_row = []
+		max_value = -float("inf")
+		max_value_index = 0
+		for j in range(len(modselalgos)):
+			# if len(exp_types) == 1:
+			# 	data_row.append(r'{}\pm{}'.format(mean_data_matrix[j],std_data_matrix[j]))
+			# 	if max_value < mean_data_matrix[j]:
+			# 		max_value = mean_data_matrix[j]
+			# 		max_value_index = j
+			# else:
+				data_row.append(r'${}\pm{}$'.format(mean_data_matrix[i,j],std_data_matrix[i,j]))
+				if max_value < mean_data_matrix[i,j]:
+					max_value = mean_data_matrix[i,j]
+					max_value_index = j
+
+		data_matrix.append(data_row)
+		colors[i][max_value_index] = "red"
 
 
-	with open(resulting_filename, "w") as f:
-		f.write(table_code)
-		f.close()
+	# Create a figure and axis
+	fig, ax = plt.subplots()
+
+	# Create the table
+	table = ax.table(cellText=data_matrix,
+	                 cellColours=colors,
+	                 cellLoc='center',
+	                 colLabels=column_names,
+	                 rowLabels=row_names,
+	                 loc='center')
+
+	# Modify the appearance of the table
+	table.auto_set_font_size(False)
+	table.set_fontsize(14)
+	table.scale(1.2, 1.2)
+
+	# Hide the axis and axis labels
+	ax.axis('off')
+
+	figure_name = "{}_{}".format(exp_types_original, original_modselalgos)
+	
+	figure_file_name = "{}/{}.pdf".format(table_data_dir, figure_name)
+	# Show the plot
+	plt.savefig(figure_file_name,  bbox_inches='tight')
 
 	
 	# IPython.embed()
