@@ -198,7 +198,6 @@ if __name__ == "__main__":
 
 	normalize = str(sys.argv[5]) == "True"
 
-	#IPython.embed()
 
 
 	print("Starting experiment {}".format(exp_type))
